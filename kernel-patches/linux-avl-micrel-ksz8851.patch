@@ -1,0 +1,299 @@
+--- board-omap3beagle.c	2011-10-03 19:43:38.735882480 -0400
++++ /home/matt/board-omap3beagle.c.mrp	2011-10-04 08:50:30.203881898 -0400
+@@ -551,6 +551,296 @@
+ 	&keys_gpio,
+ };
+ 
++/*===================================================== 
++ *        v        Mirel Addition        v
++ *=====================================================
++ */
++
++#if defined(CONFIG_KS8851_SNL) || defined(CONFIG_KS8851_SNL_MODULE)
++#define KSZ8851_SNL_INT	157
++
++static struct omap2_mcspi_device_config ksz8851_mcspi_config = {
++	.turbo_mode	= 0,
++	.single_channel	= 1,  /* 0: slave, 1: master */
++};
++
++static struct spi_board_info ksz8851_snl_info[] __initdata = {
++	{
++		.modalias	= "ks8851",
++		.bus_num	= 4,
++		.chip_select	= 0,
++		.max_speed_hz	= 47500000,
++		.controller_data = &ksz8851_mcspi_config,
++		.irq		= OMAP_GPIO_IRQ(KSZ8851_SNL_INT),
++        },
++	{
++		.modalias	= "ks8851",
++		.bus_num	= 3,
++		.chip_select 	= 0,
++		.max_speed_hz	= 47500000,
++		.controller_data = &ksz8851_mcspi_config,
++		.irq		= OMAP_GPIO_IRQ(KSZ8851_SNL_INT),
++	},
++};
++
++#define CONTROL_GPIO(offset)	__REG16(OMAP_CTRL_BASE + (offset))
++
++#define CONTROL_PADCONF_MCBSP3_DX	CONTROL_GPIO(0x16C) 
++#define CONTROL_PADCONF_MCBSP3_DR	CONTROL_GPIO(0x16E)
++/* GPIO_142 */
++#define CONTROL_PADCONF_MCBSP3_CLKX	CONTROL_GPIO(0x170)
++#define CONTROL_PADCONF_MCBSP3_FSX	CONTROL_GPIO(0x172) 
++
++#define UART2_TX	CONTROL_PADCONF_MCBSP3_CLKX 
++#define UART2_RX	CONTROL_PADCONF_MCBSP3_FSX 
++
++#if 1
++#define CONTROL_PADCONF_UART2_CTS	CONTROL_GPIO(0x174) 
++#define CONTROL_PADCONF_UART2_RTS	CONTROL_GPIO(0x176) 
++#define CONTROL_PADCONF_UART2_TX_	CONTROL_GPIO(0x178) 
++#define CONTROL_PADCONF_UART2_RX	CONTROL_GPIO(0x17A) 
++#endif
++
++/* GPIO_130 */
++//#define CONTROL_PADCONF_MMC2_CLK	CONTROL_GPIO(0x158) //~mcspi3_clk !(DSS_DATA18)!
++#define CONTROL_PADCONF_DSS_DATA18	CONTROL_GPIO(0x104)
++
++//#define CONTROL_PADCONF_MMC2_CMD	CONTROL_GPIO(0x15A) //~mcspi3_simo !(DSS_DATA19)!
++#define CONTROL_PADCONF_DSS_DATA19	CONTROL_GPIO(0x106)
++
++//#define CONTROL_PADCONF_MMC2_DAT0	CONTROL_GPIO(0x15C) //~mcspi3_somi !(DSS_DATA20)!
++#define CONTROL_PADCONF_DSS_DATA20	CONTROL_GPIO(0x108)
++
++#define CONTROL_PADCONF_MMC2_DAT1	CONTROL_GPIO(0x15E) //~no change, not used
++
++//#define CONTROL_PADCONF_MMC2_DAT2	CONTROL_GPIO(0x160) //~mcspi3_cs1 !(DSS_DATA22)!
++#define CONTROL_PADCONF_DSS_DATA22	CONTROL_GPIO(0x10C)
++
++//#define CONTROL_PADCONF_MMC2_DAT3	CONTROL_GPIO(0x162) //~mcspi3_cs0 !(DSS_DATA21)!
++#define CONTROL_PADCONF_DSS_DATA21	CONTROL_GPIO(0x10A)
++
++#define CONTROL_PADCONF_MMC2_DAT4	CONTROL_GPIO(0x164) //~no change, not used
++
++#define CONTROL_PADCONF_MMC2_DAT5	CONTROL_GPIO(0x166) //~no change, not used
++/* GPIO_138 */
++//#define CONTROL_PADCONF_MMC2_DAT6	CONTROL_GPIO(0x168) //~gpio_138 !(DSS_DATA17)!
++#define CONTROL_PADCONF_DSS_DATA17	CONTROL_GPIO(0x102)
++
++#define CONTROL_PADCONF_MMC2_DAT7	CONTROL_GPIO(0x16A) //~no change, not used
++
++/* GPIO_156 */
++#define CONTROL_PADCONF_MCBSP1_CLKR	CONTROL_GPIO(0x18C)
++/* GPIO_157 */
++#define CONTROL_PADCONF_MCBSP1_FSR	CONTROL_GPIO(0x18E)
++#define CONTROL_PADCONF_MCBSP1_DX	CONTROL_GPIO(0x190)
++#define CONTROL_PADCONF_MCBSP1_DR	CONTROL_GPIO(0x192)
++#define CONTROL_PADCONF_MCBSP1_CLKS	CONTROL_GPIO(0x194)
++#define CONTROL_PADCONF_MCBSP1_FSX	CONTROL_GPIO(0x196)
++#define CONTROL_PADCONF_MCBSP1_CLKX	CONTROL_GPIO(0x198)
++
++#define SPI4_CLK	CONTROL_PADCONF_MCBSP1_CLKR
++#define SPI4_SIMO	CONTROL_PADCONF_MCBSP1_DX
++#define SPI4_SOMI	CONTROL_PADCONF_MCBSP1_DR
++#define SPI4_CS0	CONTROL_PADCONF_MCBSP1_FSX
++#define SPI4_INTR	CONTROL_PADCONF_MCBSP1_FSR
++
++/* changed to match new SPI3 */
++//#define SPI3_CLK	CONTROL_PADCONF_MMC2_CLK
++#define SPI3_CLK 	CONTROL_PADCONF_DSS_DATA18
++//#define SPI3_SIMO	CONTROL_PADCONF_MMC2_CMD
++#define SPI3_SIMO	CONTROL_PADCONF_DSS_DATA19
++//#define SPI3_SOMI	CONTROL_PADCONF_MMC2_DAT0
++#define SPI3_SOMI	CONTROL_PADCONF_DSS_DATA20
++//#define SPI3_CS0	CONTROL_PADCONF_MMC2_DAT3
++#define SPI3_CS0	CONTROL_PADCONF_DSS_DATA21
++//#define SPI3_CS1	CONTROL_PADCONF_MMC2_DAT2
++#define SPI3_CS1	CONTROL_PADCONF_DSS_DATA22
++//#define SPI3_INTR	CONTROL_PADCONF_MMC2_DAT6
++#define SPI3_INTR	CONTROL_PADCONF_DSS_DATA17
++
++#define GPIO_IRQSTATUS1( x )		DEFINE_REG(x, 0x18)
++#define GPIO_IRQSTATUS2( x )		DEFINE_REG(x, 0x28)
++#define GPIO_IRQENABLE1( x )		DEFINE_REG(x, 0x1C)
++#define GPIO_WAKEUPENABLE( x )		DEFINE_REG(x, 0x20)
++#define GPIO_CLEARIRQENABLE1( x )	DEFINE_REG(x, 0x60)
++#define GPIO_SETIRQENABLE1( x )		DEFINE_REG(x, 0x64)
++#define GPIO_SETWKUENA( x )		SYSCONFIG_REG32(x, 0x84)
++#define GPIO_LEVELDETECT( x )		SYSCONFIG_REG32(x, 0x40)
++#define GPIO_RISINGDETECT( x )		SYSCONFIG_REG32(x, 0x48)
++#define GPIO_FALLINGDETECT( x )		SYSCONFIG_REG32(x, 0x4C)
++
++static int __init omap3430_spi_init(void)
++{
++	int irq = irq_to_gpio(ksz8851_snl_info[0].irq);
++
++#if 0
++	u16 data;
++
++	data = CONTROL_PADCONF_UART2_RTS;
++printk( "rts: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++printk( "rts: %04x\n", data );
++#if 0
++	CONTROL_PADCONF_UART2_RTS = data;
++#endif
++
++	data = CONTROL_PADCONF_UART2_CTS;
++printk( "cts: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++printk( "cts: %04x\n", data );
++#if 0
++	CONTROL_PADCONF_UART2_CTS = data;
++#endif
++
++	data = CONTROL_PADCONF_UART2_TX_;
++printk( "tx: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++#if 1
++printk( "tx: %04x\n", data );
++	CONTROL_PADCONF_UART2_TX_ = data;
++#endif
++
++	data = CONTROL_PADCONF_UART2_RX;
++printk( "rx: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE4;
++#if 1
++printk( "rx: %04x\n", data );
++	CONTROL_PADCONF_UART2_RX = data;
++#endif
++	data = CONTROL_PADCONF_MCBSP3_DX;
++printk( "dx: %04x\n", data );
++	data = CONTROL_PADCONF_MCBSP3_DR;
++printk( "dr: %04x\n", data );
++
++	data = UART2_TX;
++printk( "tx: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE4;
++#if 1
++printk( "tx: %04x\n", data );
++	UART2_TX = data;
++#endif
++
++	data = UART2_RX;
++printk( "rx: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++#if 1
++printk( "rx: %04x\n", data );
++	UART2_RX = data;
++#endif
++#endif
++
++#if 0
++	data = SPI4_CLK;
++printk( "CLKR: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_INPUTENABLE;
++printk( "CLKR: %04x\n", data );
++	SPI4_CLK = data;
++	data = SPI4_SIMO;
++printk( "DX: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "DX: %04x\n", data );
++	SPI4_SIMO = data;
++	data = SPI4_SOMI;
++printk( "DR: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "DR: %04x\n", data );
++	SPI4_SOMI = data;
++	data = SPI4_CS0;
++printk( "FSX: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++printk( "FSX: %04x\n", data );
++	SPI4_CS0 = data;
++	data = SPI4_INTR;
++printk( "FSR: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE4;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "FSR: %04x\n", data );
++	SPI4_INTR = data;
++
++printk( "FCLKEN1: %08x\n", CM_FCLKEN1_CORE );
++#endif
++
++#if 0
++printk( "MMC2_CLK: %04x\n", data );
++	data = SPI3_CLK;
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_INPUTENABLE;
++printk( "MMC2_CLK: %04x\n", data );
++	SPI3_CLK = data;
++
++	data = SPI3_SIMO;
++printk( "MMC2_CMD: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "MMC2_CMD: %04x\n", data );
++	SPI3_SIMO = data;
++	data = SPI3_SOMI;
++printk( "MMC2_DAT0: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "MMC2_DAT0: %04x\n", data );
++	SPI3_SOMI = data;
++	data = SPI3_CS0;
++printk( "MMC2_DAT3: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE1;
++printk( "MMC2_DAT3: %04x\n", data );
++	SPI3_CS0 = data;
++	data = SPI3_INTR;
++printk( "MMC2_DAT6: %04x\n", data );
++	data &= ~IO_PAD_MUXMODE7;
++	data |= IO_PAD_MUXMODE4;
++	data |= IO_PAD_PULLUDENABLE |
++		IO_PAD_PULLTYPESELECT |
++		IO_PAD_INPUTENABLE;
++printk( "MMC2_DAT6: %04x\n", data );
++	SPI3_INTR = data;
++#endif
++
++	if (omap_request_gpio( irq ) < 0) {
++		return 1;
++	}
++	omap_set_gpio_direction(irq, 1);
++	spi_register_board_info(ksz8851_snl_info,
++		ARRAY_SIZE(ksz8851_snl_info));
++	return 0;
++}
++
++arch_initcall(omap3430_spi_init);
++#endif
++
++/*===================================================== 
++ *        ^        Mirel Addition        ^
++ *=====================================================
++ */
++
+ static void __init omap3beagle_flash_init(void)
+ {
+ 	u8 cs = 0;
